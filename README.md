@@ -25,20 +25,20 @@ Author:  Joseph Pranadeer Reddy Katakam (jkatak73@terpmail.umd.edu)
 
 
 ## Intro to Kilobots:
-    Kilobots are low-cost swarm robots designed to execute commands in groups of up to a thousand, simulating swarms of insects, and performing tasks that cannot be done by individual robots, developed by Harvard University's Radhika Nagpal and Michael Rubenstein, capable of collective transport.
+Kilobots are low-cost swarm robots designed to execute commands in groups of up to a thousand, simulating swarms of insects, and performing tasks that cannot be done by individual robots, developed by Harvard University's Radhika Nagpal and Michael Rubenstein, capable of collective transport.
 
 ## Instructions to Setup KiloGUI and Connect to Controller:
-    - To set up KiloGUI (software to upload code onto kilobot), there is a file called '[Kilobot GUI Setup_Guide.pdf](/assets/Kilobot_GUI_Setup_Guide.pdf)' in the 'assets' folder located in the main directory.
-    - Once everything has been set up, everytime you can proceed to Step (5-7) in Section III of the PDF to connect the Arduino controller with the PC.
+- To set up KiloGUI (software to upload code onto kilobot), there is a file called '[Kilobot GUI Setup_Guide.pdf](/assets/Kilobot_GUI_Setup_Guide.pdf)' in the 'assets' folder located in the main directory.
+- Once everything has been set up, everytime you can proceed to Step (5-7) in Section III of the PDF to connect the Arduino controller with the PC.
 
 ## About this Package:
-    - This package is a collection of properly arranged directories that are designed to convert '.c' files into the required '.hex' format for conducting experiments on kilobots.
-    - The kilobots can only execute files in the '.hex' format.
+- This package is a collection of properly arranged directories that are designed to convert '.c' files into the required '.hex' format for conducting experiments on kilobots.
+- The kilobots can only execute files in the '.hex' format.
 
 ### How the Package works:
-    - When you use the 'make' command to build this folder, it will generate 
+- When you use the 'make' command to build this folder, it will generate 
     three folders automatically: 'build', 'docs', and 'hex'.
-    - Among these folders, the 'hex' folder contains a list of '.hex' programs that can be uploaded onto the kilobot by using 'KiloGUI'.
+- Among these folders, the 'hex' folder contains a list of '.hex' programs that can be uploaded onto the kilobot by using 'KiloGUI'.
 
 ## Package Breakdown:
 
@@ -61,8 +61,7 @@ Author:  Joseph Pranadeer Reddy Katakam (jkatak73@terpmail.umd.edu)
         build it using 'kilolib'.
 
 ## Instructions to add New Code:
-    - To include a new code, make a directory within the 'src' folder named after the project, 
-    and then put the corresponding '.c' files inside it.
+- To include a new code, make a directory within the 'src' folder named after the project, and then put the corresponding '.c' files inside it.
 
 ## Instructions to Build a Program:
     1. Open the terminal and navigate to the source directory that contains the MAKE file.
@@ -73,6 +72,6 @@ Author:  Joseph Pranadeer Reddy Katakam (jkatak73@terpmail.umd.edu)
     5. Use KiloGUI to upload the "file_name.hex" file to your kilobot.
 
 ## Errors when building a file using 'make':
-    - Sometimes, when trying to generate multiple '.hex' files, there could be a built system files overlap.
-    - This would throw out error such as, "Nothing to be done for 'all'".
-    - In such a case, delete the build folder generated in the source directory and try rerunning the 'make' command.
+- Sometimes, when trying to generate multiple '.hex' files, there could be a built system files overlap.
+- This would throw out error such as, "Nothing to be done for 'all'".
+- In such a case, delete the build folder generated in the source directory and try rerunning the 'make' command.
