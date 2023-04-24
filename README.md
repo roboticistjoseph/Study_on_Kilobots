@@ -2,7 +2,7 @@
 
 ## Independent Research Study:
 
-    Unleashing the Swarm: Exploring Kilobot Performance in Forming Formations as Singles vs Duos. Join our groundbreaking research study to unlock the secrets of these small but mighty robots. Witness the mesmerizing dance of kilobots as they shape-shift into formations. Will they outshine as lone stars or synergize as dynamic duos? Be part of this cutting-edge investigation into the fascinating world of kilobots and be amazed!
+Unleashing the Swarm: Exploring Kilobot Performance in Forming Formations as Singles vs Duos. Join our groundbreaking research study to unlock the secrets of these small but mighty robots. Witness the mesmerizing dance of kilobots as they shape-shift into formations. Will they outshine as lone stars or synergize as dynamic duos? Be part of this cutting-edge investigation into the fascinating world of kilobots and be amazed!
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
