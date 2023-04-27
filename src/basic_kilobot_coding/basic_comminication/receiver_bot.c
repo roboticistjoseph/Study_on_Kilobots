@@ -11,7 +11,7 @@
  */
 
 // kilolib library
-#include "../../kilolib/kilolib.h"
+#include "../../../kilolib/kilolib.h"
 
 // variable declaration
 

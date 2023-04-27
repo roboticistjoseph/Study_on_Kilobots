@@ -1,8 +1,8 @@
 /**
- * @file anshuman_con_circ_seed.c
- * @author Jared and Joseph
+ * @file chris_con_circ_seed.c
+ * @author Chris
  *
- * @brief Modified version of the algorithm to form concentric circles using singles. (Seed)
+ * @brief 2nd version of the algorithm to form concentric circles using singles. (Seed)
  * @version 0.1
  * @date 2023-04-05
  * 
@@ -10,28 +10,21 @@
  * 
  */
 
+// standard libraries
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
 // kilolib library
-#include "../../kilolib/kilolib.h"
-#include "../../kilolib/debug.h"
+#include "../../../kilolib/kilolib.h"
+#include "../../../kilolib/debug.h"
 
 // preprocessor directives
-#define NUMBER_OF_ROBOTS 8  // Simulation uses 46
+#define NUMBER_OF_ROBOTS 40
 #define DEBUG
 
-// LED colors
-#define LED_OFF          RGB(0, 0, 0)
-#define LED_WHITE        RGB(1, 1, 1)
-#define LED_BLUE         RGB(0, 0, 2)
-#define LED_CYAN         RGB(0, 2, 2)
-#define LED_GREEN        RGB(0, 2, 0)
-#define LED_YELLOW       RGB(2, 2, 0)
-#define LED_RED          RGB(2, 0, 0)
-#define LED_MAGENTA      RGB(2, 0, 2)
 
-/**
- * @brief GLobal structure to hold the variable used by algorithm.
- * 
- */
+
 struct GLOBALS {
   // global variables
   // NOTE: the use of a GLOBALS struct will also work on a normal kilobot,
@@ -40,131 +33,119 @@ struct GLOBALS {
 
   message_t message;
 
-  // flags
-  int message_sent;  // keep track of message transmission.
+  // Flag to keep track of message transmission.
+  int message_sent;
+  int stop;
+  int data_from;
 
-  // container to track the number of kilobots in first circle
   int stopped_robots_array[NUMBER_OF_ROBOTS];
 
-  // container to track the time of arrival of kilobots in first circle
   int time_array[NUMBER_OF_ROBOTS];
-}* g;  // there should only be one GLOBAL, this is it, remember to register it in main()
+}* g;  //  there should only be one GLOBAL, this is it, remember to register it in main()
 
 
-/**
- * @brief Kilobot Setup
- * 
- */
+
 void setup() {
+  // Initialize message
+  // (note that because we are never changing the data in the message in this example
+  // then we only need to do this once, otherwise we'd need to do it every time we
+  // wanted to send a new message)
+
   // The type is always NORMAL.
   g->message.type = NORMAL;
 
   // indicate we are a star
   g->message.data[0] = 0;
-
-  // track & communicate the number of kilobots present in first circle
-  g->message.data[1] = 0;
+  g->message.data[1] = 0;  //  this will send message to planet robots that star has 12 neighbors
 
   // It's important that the CRC is computed after the data has been set;
   // otherwise it would be wrong.
   g->message.crc = message_crc(&g->message);
 
-  // set all the flags to uninitialized state
+  g->stop = 0;
+  g->data_from = -1;
+
   int i;
   for (i = 0; i <= NUMBER_OF_ROBOTS-1; i++) {
-    g->stopped_robots_array[i] = -1;  // modified initialization
-    // g->stopped_robots_array[i] = 0;  // init to a large number????
+    g->stopped_robots_array[i] = 0;  //  init to a large number
     g->time_array[i] = 0;
   }
 }
 
-/**
- * @brief Kilobot Loop
- * 
- */
 void loop() {
-//   set_color(RGB(1, 0, 1));
+  set_color(RGB(1, 0, 1));
 
   // Blink LED magenta whenever a message is sent.
   if (g->message_sent == 1) {
       // Reset flag so LED is only blinked once per message.
       g->message_sent = 0;
 
-      set_color(LED_MAGENTA);
+      set_color(RGB(1, 0, 1));
       delay(1000);
-      set_color(LED_OFF);
+      set_color(RGB(0, 0, 0));
   }
 
   int i;
-  int n_counter = 0;  // counts the kilobots in the circle
-
+  int n_counter = 0;
   for (i = 0; i <= NUMBER_OF_ROBOTS-1; i++) {
     // here we are checking if the we heard from a robot in the last 40 ticks
     // if not heard then that robot must not be in the stopped radius
     // hence set its value in the array = 0 so we can only count the number of
     // robots which are stopped.
-    if (kilo_ticks - (g->time_array[i]) > 40) {
+    if (kilo_ticks-g->time_array[i] > 40) {
       g->stopped_robots_array[i] = 0;
     }
 
-    // update counter when kilobot is present in first circle
     if (g->stopped_robots_array[i] == 1) {
       n_counter++;
-      // REMOVE LATER
-      set_color(LED_CYAN);
-      delay(1000);
-      set_color(LED_OFF);
     }
   }
 
-  // communicate to other kilobots, the number of kilobots in first circle
+  // if (g->stop==1)
+  // {
+  //   log_message("Robot %d says Im a stopped",g->data_from);
+  // }
+
+  // log_message("Stopped : %d ",n_counter);
+
+  // if (n_counter>=12)
+  // {
+  //   g->message.data[1]=1; // desirable number of neighbors reached; tell this to other planet robots
+  // }
+  // else
+  // {
+  //   g->message.data[1]=0;
+  // }
+  // log_message("Im a star");
   g->message.data[1] = n_counter;
   delay(100);
 }
 
-/**
- * @brief receiver callback function.
- * 
- * @param m  // message 
- * @param d  // distance 
- */
+
 void message_rx(message_t *m, distance_measurement_t *d) {
-  // getting msg from planet robot
-  if (m->data[0] == 1) {
-      // REMOVE LATER
-      set_color(LED_GREEN);
-      delay(1000);
-    // if the planet robot is part of first ring
-    if (m->data[1] == 1) {
-      // NOTE: m->data[2] has the kilobot uid that is in communication
+  if (m->data[0] == 1) {  // gettting msg from planet robot
+    if (m->data[1] == 1) {  // if the planet robot is stopped
       g->time_array[m->data[2]] = kilo_ticks;  // set the time when the planet robot stopped
+
+      g->stop = 1;                // flag to be to tell star that robot stopped with having
+      g->data_from = m->data[2];  // kilo uid equal to this
+
       g->stopped_robots_array[m->data[2]] = 1;  // setting value of corresponging uid robot in array to 1
-      // REMOVE LATER
-      set_color(LED_CYAN);
-      delay(1000);
-      set_color(LED_OFF);
-    } else if (m->data[1] == 0) {  // else should be used????
+    } else if (m->data[1] == 0) {
       g->stopped_robots_array[m->data[2]] = 0;
     }
   }
 }
 
-/**
- * @brief transmitter callback function.
- * 
- * @return message_t* 
- */
 message_t *message_tx() {
-    // message is transmitted roughly twice per sec
+    // log_message_from_sim("|| S  data[0]: %u", g->message.data[0]);
+
     return &(g->message);
 }
 
-/**
- * @brief message success callback (called *after* a message is sent)
- * 
- */
+
 void message_tx_success() {
-    // set flag on message transmission.
+    // Set flag on message transmission.
     g->message_sent = 1;
 }
 
@@ -175,13 +156,14 @@ int main() {
     #ifdef USING_SIMULATION
       // register the global variables (only necessary on simulation)
       // g is a pointer
-      // so the address of g is a pointer to a pointer,the address of it is
-      // getting casted to a pointer to a void pointer
+      // so the address of g is a pointer to a pointer,the address of it
+      // is getting casted to a pointer to a void pointer
 
       kilo_globals = (void**)&g;  // NOLINT
     #endif
 
     kilo_init();
+
 
     // Register the message_rx callback function.
     kilo_message_rx = message_rx;
@@ -202,5 +184,7 @@ int main() {
       free(g_safe);
     #endif
 
+
     return 0;
 }
+

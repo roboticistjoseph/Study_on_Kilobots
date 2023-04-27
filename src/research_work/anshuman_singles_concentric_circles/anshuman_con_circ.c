@@ -16,9 +16,9 @@
 #include <string.h>
 
 // kilolib library
-#include "../../kilolib/kilolib.h"
+#include "../../../kilolib/kilolib.h"
 #define DEBUG
-#include "../../kilolib/debug.h"
+#include "../../../kilolib/debug.h"
 
 // preprocessor directives
 #define SetBit(A, k) (A[(k / 32)] |= (1 << (k % 32)))     // sets the kth bit in array A

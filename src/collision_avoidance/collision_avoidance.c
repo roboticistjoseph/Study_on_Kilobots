@@ -95,14 +95,16 @@ void move(int new_motion, int duration = 500) {
 
 // Define a function to handle the kilobot's collision avoidance.
 void avoid_collision() {
-  move(LEFT, 500);
-  collision_flag = 1;
+    set_color(LED_RED);  // [INDICATION]: kilobot avoiding collision
+    move(LEFT, 500);
+    collision_flag = 1;
 }
 
 // Define a function to handle the kilobot's previous motion task.
 void continue_previous_motion() {
-  move(previous_motion, 500);
-  collision_flag = 0;
+    set_color(LED_BLUE);  // [INDICATION]: kilobot continuing previous motion
+    move(previous_motion, 500);
+    collision_flag = 0;
 }
 
 /**

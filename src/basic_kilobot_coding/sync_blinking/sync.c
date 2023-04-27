@@ -12,7 +12,7 @@
  */
 
 // kilolib library
-#include "../../kilolib/kilolib.h"
+#include "../../../kilolib/kilolib.h"
 
 // Nominal period with which to blink; approximately 2 seconds. This will be
 // be the period of every robot once the swarm has synchronized.

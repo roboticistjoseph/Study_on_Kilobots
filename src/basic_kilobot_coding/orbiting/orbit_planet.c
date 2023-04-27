@@ -11,7 +11,7 @@
  */
 
 // kilolib library
-#include "../../kilolib/kilolib.h"
+#include "../../../kilolib/kilolib.h"
 
 // Constants for orbit control.
 #define TOO_CLOSE_DISTANCE 40

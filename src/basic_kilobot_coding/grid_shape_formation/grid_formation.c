@@ -11,7 +11,7 @@
  */
 
 // include kilolib API
-#include "../../kilolib/kilolib.h"
+#include "../../../kilolib/kilolib.h"
 
 // Define MOTION
 #define FORWARD 0

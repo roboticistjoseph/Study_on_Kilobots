@@ -1,10 +1,10 @@
 /**
- * @file duo_bots.c
+ * @file single_bots.c
  * @author Jared and Joseph
  *
- * @brief Modified version of the DUO's algorithm to form concentric circles using singles. (Planet)
- * @version 0.1
- * @date 2023-04-21
+ * @brief Modified version of the algorithm to form concentric circles using singles. (Planet)
+ * @version 0.4
+ * @date 2023-04-07
  * 
  * @copyright Copyright (c) 2023
  * 
@@ -16,9 +16,9 @@
 #include <string.h>
 
 // kilolib library
-#include "../../kilolib/kilolib.h"
+#include "../../../kilolib/kilolib.h"
 #define DEBUG
-#include "../../kilolib/debug.h"
+#include "../../../kilolib/debug.h"
 
 // preprocessor directives to assign BIT values
 #define SetBit(A, k) (A[(k / 32)] |= (1 << (k % 32)))     // sets the kth bit in array A
@@ -31,9 +31,9 @@
 #define MAX_NEIGHBORS 200
 
 // Parameters for Circle formation
-#define DESIRED_DISTANCE  75
+#define DESIRED_DISTANCE  65
 #define EPSILON           20
-#define MIN_DISTANCE      45
+#define MIN_DISTANCE      35
 #define MAX_DISTANCE      140
 
 // LED colors (Used as debugging mechanism)
@@ -64,6 +64,7 @@ void move(int new_motion, int duration) {
             // Go STRAIGHT
             spinup_motors();
             set_motors(kilo_straight_left, kilo_straight_right);
+            // set_motors(kilo_turn_left, kilo_turn_right);  // Pivot anti-clockwise
             delay(duration);
             set_motors(0, 0);
             delay(duration);
@@ -72,6 +73,8 @@ void move(int new_motion, int duration) {
             // Turn LEFT
             spinup_motors();
             set_motors(kilo_straight_left, 0);
+            // spindown(255);  // spins anti-clockwise
+            // kilo_turn_left(255);  // spins anti-clockwise
             delay(duration);
             set_motors(0, 0);
             delay(duration);
@@ -80,6 +83,8 @@ void move(int new_motion, int duration) {
             // Turn RIGHT
             spinup_motors();
             set_motors(0, kilo_straight_right);
+            // spinup(255);  // spins clockwise
+            // kilo_turn_right(255);  // spins clockwise
             delay(duration);
             set_motors(0, 0);
             delay(duration);
@@ -101,7 +106,7 @@ struct GLOBALS {
     // NOTE: the use of a GLOBALS struct will also work on a normal kilobot,
     //       but is not required on a normal kilobot.
     //       It is, however, required by the simulator.
-
+    // int rcvd_id;
     int current_motion;
     int loop_count;
     int distance;
@@ -151,6 +156,7 @@ struct GLOBALS {
  */
 void setup() {
     // Initializing Varibales
+    // g->rcvd_id = -1;  // ?????
     //**********************************************************
     for (int n = 0; n < 3; n++) {
         g->my_array[n] = 0;
@@ -230,22 +236,22 @@ void setup() {
     g->outgoing_message.crc = message_crc(&g->outgoing_message);
 }
 
-// int count() {
-//     int counter = 0;
-//     for (int p = 0; p < 96; p++) {
-//         if (TestBit(g->my_array, p)) {
-//             counter++;
-//         }
-//     }
-//     return counter;
-// }
+int count() {
+    int counter = 0;
+    for (int p = 0; p < 96; p++) {
+        if (TestBit(g->my_array, p)) {
+            counter++;
+        }
+    }
+    return counter;
+}
 
 void loop() {
     // update looper which tracks the time since the kilobot started
     g->loop_count++;
 
     // pause when starting (to finish experimental setup)
-    if (g->loop_count == 0 || g->looper == 1 || g->looper == 2) {
+    if (g->loop_count == 0) {
         delay(9000);
     }
 
@@ -255,58 +261,42 @@ void loop() {
 
     move(STOP, 200);  // [MOTOR ACTION]: stop previous motor action for every new iteration
     set_color(LED_OFF);  // [INDICATION]: Color indicates that kilobot not in communication range of others
-    // delay(2000);
 
     // [CASE]: when a new message is received
     if (g->new_message == 1) {
         g->new_message = 0;  // reset message flag
+        set_color(LED_GREEN);  // [INDICATION]: kilobot is in communication range with others
 
      // OTTE -------- START different distance based cases for first circle -----
 
         // [CASE]: Kilobot reached desired orbit (Define Stopping Criterion)
-        if ((g->distance >= (DESIRED_DISTANCE - EPSILON)) && (g->distance <= (DESIRED_DISTANCE + EPSILON))) {
+        if ((g->distance > (DESIRED_DISTANCE - EPSILON)) && (g->distance <= (DESIRED_DISTANCE + EPSILON))) {
             // [UPDATE]: First circle is formed
-            g->outgoing_message.data[1] = 1;  // Ring 1 complete
-            delay(300);
             g->my_ring_number = 1;
-            delay(300);
+            g->outgoing_message.data[1] = 1;  // Ring 1 complete
             g->my_stop_status = 1;  // stop algorithm
-            delay(300);
 
             set_color(LED_BLUE);  // [INDICATION]: kilobot has reached it's destination
-            delay(3000);
             move(STOP, 1000);  // [MOTOR ACTION]: stop motors
             // g->messgae.data[8]=1;  // I'm ring 1 ????
         }
-        // else {
-        //     // ring status is incomplete (reset) for every new iteration
-        //     g->outgoing_message.data[1] = 0;
-        //     g->my_stop_status = 0;
-        // }
 
         // [CASE]: when kilobot is very close to the Seed robot
-        if ((g->distance < (DESIRED_DISTANCE - EPSILON)) &&
+        if ((g->distance < MIN_DISTANCE) &&
              g->ring_status_from_star_robot == 0 &&
              g->ring_status_from_planet_robot == 0) {
             set_color(LED_RED);  // [INDICATION]: planet is close to colliding with Seed robot
-            delay(2000);
 
             // [MOTOR ACTION]: kilobot has to turn around and go backwards (away from collision range of Seed)
-            if (kilo_uid < TOTAL_KILOBOTS / 2) {
-                move(FORWARD, 2000);  // [MOTOR ACTION]: Left kilobot goes Straight
-            } else if (kilo_uid >= TOTAL_KILOBOTS / 2) {
-                move(STOP, 2000);  // [MOTOR ACTION]: Right kilobot stops
-            }
-
-            move(FORWARD, 650);  // [MOTOR ACTION]: Duo goes Straight?
+            move(LEFT, 1000);
+            move(FORWARD, 650);
             g->my_stop_status = 0;
         }
 
         // [Case]: when planet is close to the orbit but not in the orbit
         if ((g->distance > (DESIRED_DISTANCE + EPSILON)) && (g->distance <= MAX_DISTANCE)) {
             set_color(LED_CYAN);  // [INDICATION]: planet is about to enter orbit
-            delay(2000);
-            move(FORWARD, 500);  // [MOTOR ACTION]: move straight
+            move(FORWARD, 150);  // [MOTOR ACTION]: move straight
             // g->my_stop_status=0;????
         }
 
@@ -317,7 +307,6 @@ void loop() {
             // [CASE]: if first circle formed, indicate other bots
             g->outgoing_message.data[3] = 1;
             set_color(LED_WHITE);  // [INDICATION]: Circle formed
-            delay(2000);
 
             if (g->distance < (DESIRED_DISTANCE + EPSILON)) {
                 set_color(LED_WHITE);  // [INDICATION]: Circle formed
@@ -350,12 +339,6 @@ void loop() {
 //                 g->message_from_stopped_L1_robot = 0;  // Reset the flag
 
 //                 set_color(LED_GREEN);  // [INDICATION]: in communication range
-//                   // [MOTOR ACTION]: kilobot has to turn around and go backwards (away from collision range of Seed)
-                // if (kilo_uid < TOTAL_KILOBOTS / 2) {
-                //     move(FORWARD, 300);  // [MOTOR ACTION]: Left kilobot goes Straight
-                // } else if (kilo_uid >= TOTAL_KILOBOTS / 2) {
-                //     move(STOP, 300);  // [MOTOR ACTION]: Right kilobot stops
-                // }
 //                 move(FORWARD, 700);  // [MOTOR ACTION]: Go straight
 //                 move(LEFT, 300);  // [MOTOR ACTION]: Turn Left
 //         }
@@ -537,14 +520,11 @@ void loop() {
 
         // [CASE]: when kilobot has not received message for a very long period
         if (kilo_ticks > g->last_changed + 32 * 30) {
-            set_color(LED_YELLOW);  // [INDICATION]: kilobot very far from communication range
-            g->last_changed = kilo_ticks;  // [UPDATE]: kiloticks
+            // [UPDATE]: kiloticks
+            g->last_changed = kilo_ticks;
 
-            if (kilo_uid < TOTAL_KILOBOTS / 2) {
-                move(FORWARD, 3400);  // [MOTOR ACTION]: left kilobot goes straight
-            } else if (kilo_uid >= TOTAL_KILOBOTS / 2) {
-                move(STOP, 3400);  // [MOTOR ACTION]: right kilobot stops
-            }
+            set_color(LED_YELLOW);  // [INDICATION]: kilobot very far from communication range
+            move(LEFT, 3400);  // [MOTOR ACTION]: Turn left
         }
     }
 }
@@ -605,10 +585,10 @@ void message_rx(message_t *m, distance_measurement_t *d) {
     //         //*************
     //     }
 
-        // // [CASE]: a planet sent us message that the ring has formed
-        // if (m->data[3] == 1) {
-        //     g->ring_status_from_planet_robot = 1;
-        // }
+        // [CASE]: a planet sent us message that the ring has formed
+        if (m->data[3] == 1) {
+            g->ring_status_from_planet_robot = 1;
+        }
     // }
 }
 
@@ -629,20 +609,32 @@ message_t *message_tx() {
 
 int main() {
     struct GLOBALS* g_safe =  (struct GLOBALS*)malloc(sizeof(struct GLOBALS));
-    // struct GLOBALS* g_safe =  (struct GLOBALS*)calloc(1, sizeof(struct GLOBALS));
+
+#ifdef USING_SIMULATION
+    // register the global variables (only necessary on simulation)
+    // g is a pointer
+    // so the address of g is a pointer to a pointer,the address of it is getting casted to a pointer to a void pointer
+
+    kilo_globals = (void **)&g;  // NOLINT
+#endif
 
     kilo_init();
-
-    // Register the message_tx callback function.
-    kilo_message_tx = message_tx;
 
     // Register the message_rx callback function.
     kilo_message_rx = message_rx;
 
+    // Register the message_tx callback function.
+    kilo_message_tx = message_tx;
+
     g = g_safe;
 
+#ifdef USING_SIMULATION
+    kilo_start(setup, loop, message_rx, message_tx, message_tx_success);
+#else
     kilo_start(setup, loop);
-    free(g_safe);  // free user defined globals
+    // free user defined globals
+    free(g_safe);
+#endif
 
     return 0;
 }

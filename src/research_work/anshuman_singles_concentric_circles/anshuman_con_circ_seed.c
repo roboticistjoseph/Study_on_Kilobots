@@ -11,8 +11,8 @@
  */
 
 // kilolib library
-#include "../../kilolib/kilolib.h"
-#include "../../kilolib/debug.h"
+#include "../../../kilolib/kilolib.h"
+#include "../../../kilolib/debug.h"
 
 // preprocessor directives
 #define NUMBER_OF_ROBOTS 46

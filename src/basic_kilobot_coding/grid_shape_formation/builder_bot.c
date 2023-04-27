@@ -1,17 +1,17 @@
 /**
- * @file transmitter_bot.c
+ * @file builder_bot.c
  * @author Joseph Katakam (jkatak73@terpmail.umd.edu)
  *
- * @brief Code to Broadcast a fixed message, and blink magenta when you transmit
+ * @brief Code to Broadcast a fixed message as a builder, and act as a reference for grid formation
  * @version 0.1
- * @date 2023-03-14
+ * @date 2023-03-16
  * 
  * @copyright Copyright (c) 2023
  * 
  */
 
 // kilolib library
-#include "../../kilolib/kilolib.h"
+#include "../../../kilolib/kilolib.h"
 
 // variable declaration
 
@@ -52,7 +52,7 @@ void setup() {
     // message Identifier
     transmit_msg.type = NORMAL;
 
-    // message Payload
+    // kilobot UID - message Payload
     transmit_msg.data[0] = 0;
 
     // It's important that the CRC is computed after the data has been set;

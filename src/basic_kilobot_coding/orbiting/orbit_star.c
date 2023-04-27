@@ -1,17 +1,18 @@
 /**
- * @file builder_bot.c
+ * @file orbit_star.c
  * @author Joseph Katakam (jkatak73@terpmail.umd.edu)
  *
- * @brief Code to Broadcast a fixed message as a builder, and act as a reference for grid formation
+ * @brief Code is same as transmitter_bot.c, with application to act as Seed kilobot.
+ *        Its purpose is to serve as a stationary reference that constantly emits beacon messages to the oribiting robot.
  * @version 0.1
- * @date 2023-03-16
+ * @date 2023-03-14
  * 
  * @copyright Copyright (c) 2023
  * 
  */
 
 // kilolib library
-#include "../../kilolib/kilolib.h"
+#include "../../../kilolib/kilolib.h"
 
 // variable declaration
 
@@ -24,23 +25,6 @@ int message_sent = 0;
 // flag to keep track of total messages sent.
 int total_messages_sent = 0;
 
-/**
- * @brief transmitter callback function.
- * 
- * @return message_t* 
- */
-message_t *message_tx() {
-  return &transmit_msg;
-}
-
-/**
- * @brief message success callback (called *after* a message is sent)
- * 
- */
-void message_tx_success() {
-  message_sent = 1;
-  total_messages_sent +=1;
-}
 
 /**
  * @brief Kilobot Setup
@@ -52,7 +36,7 @@ void setup() {
     // message Identifier
     transmit_msg.type = NORMAL;
 
-    // kilobot UID - message Payload
+    // message Payload
     transmit_msg.data[0] = 0;
 
     // It's important that the CRC is computed after the data has been set;
@@ -74,6 +58,24 @@ void loop() {
         delay(1000);
         set_color(RGB(0, 0, 0));
     }
+}
+
+/**
+ * @brief transmitter callback function.
+ * 
+ * @return message_t* 
+ */
+message_t *message_tx() {
+  return &transmit_msg;
+}
+
+/**
+ * @brief message success callback (called *after* a message is sent)
+ * 
+ */
+void message_tx_success() {
+  message_sent = 1;
+  total_messages_sent +=1;
 }
 
 int main() {
