@@ -72,8 +72,8 @@ void setup() {
   // set all the flags to uninitialized state
   int i;
   for (i = 0; i <= NUMBER_OF_ROBOTS-1; i++) {
-    // g->stopped_robots_array[i] = -1;  // modified initialization??
-    g->stopped_robots_array[i] = 0;  // init to a large number????
+    // g->stopped_robots_array[i] = -1;  // modified initialization  // REMOVE LATER
+    g->stopped_robots_array[i] = 0;  // init to a large number  // REMOVE LATER
     g->time_array[i] = 0;
   }
 }
@@ -93,6 +93,7 @@ void loop() {
       set_color(LED_MAGENTA);
       delay(1000);
       set_color(LED_OFF);
+      // printf("Message sent\n");  // REMOVE LATER
   }
 
   int i;
@@ -114,6 +115,7 @@ void loop() {
       set_color(LED_CYAN);
       delay(1000);
       set_color(LED_OFF);
+      // printf("Kilobot %d is in first circle\n", i);  // REMOVE LATER
     }
   }
 
@@ -121,34 +123,43 @@ void loop() {
   g->message.data[1] = n_counter;
   delay(100);
 
-  // debugging mechanism to count planets in first circle???
+  // debugging mechanism to count planets in first circle  // REMOVE LATER
     switch (g->message.data[1]) {
         case 0:
             set_color(LED_OFF);
+            // printf("No kilobots in first circle\n");  // REMOVE LATER
             break;
         case 1:
             set_color(LED_GREEN);
+            // printf("1 kilobot in first circle\n");  // REMOVE LATER
             break;
         case 2:
             set_color(LED_YELLOW);
+            // printf("2 kilobots in first circle\n");  // REMOVE LATER
             break;
         case 3:
             set_color(LED_RED);
+            // printf("3 kilobots in first circle\n");  // REMOVE LATER
             break;
         case 4:
             set_color(LED_MAGENTA);
+            // printf("4 kilobots in first circle\n");  // REMOVE LATER
             break;
         case 5:
             set_color(LED_CYAN);
+            // printf("5 kilobots in first circle\n");  // REMOVE LATER
             break;
         case 6:
             set_color(LED_BLUE);
+            // printf("6 kilobots in first circle\n");  // REMOVE LATER
             break;
         case 7:
             set_color(LED_WHITE);
+            printf("7 kilobots in first circle\n");  // REMOVE LATER
             break;
         default:
             set_color(LED_OFF);
+            // printf("More than 7 kilobots in first circle\n");  // REMOVE LATER
             break;
         }
 }
@@ -165,6 +176,7 @@ void message_rx(message_t *m, distance_measurement_t *d) {
       // REMOVE LATER
       set_color(LED_GREEN);
       delay(1000);
+      // printf("Message received from planet robot\n");  // REMOVE LATER
     // if the planet robot is part of first ring
     if (m->data[1] == 1) {
       // NOTE: m->data[2] has the kilobot uid that is in communication
@@ -174,8 +186,11 @@ void message_rx(message_t *m, distance_measurement_t *d) {
       set_color(LED_CYAN);
       delay(1000);
       set_color(LED_OFF);
-    } else if (m->data[1] == 0) {  // else should be used????
+      // printf("Message received from planet robot in first circle\n");  // REMOVE LATER
+    } else {  // if (m->data[1] == 0) {  // else should be used  // REMOVE LATER
+      // if the planet robot is not part of first ring
       g->stopped_robots_array[m->data[2]] = 0;
+      // printf("Message received from planet robot not in first circle\n");  // REMOVE LATER
     }
   }
 }
