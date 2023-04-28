@@ -1,1 +1,0 @@
-This is the 2nd version of the algorithm where Chris fixed the 'Data Loss' issue in communication between kilobots.
