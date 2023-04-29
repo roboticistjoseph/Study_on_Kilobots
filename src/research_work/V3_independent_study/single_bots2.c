@@ -2,7 +2,7 @@
  * @file single_bots.c
  * @author Jared and Joseph
  *
- * @brief Added pivoting sequence
+ * @brief Modified version of the algorithm to form concentric circles using singles. (Planet)
  * @version 0.4
  * @date 2023-04-07
  * 
@@ -16,9 +16,9 @@
 #include <string.h>
 
 // kilolib library
-#include "../../kilolib/kilolib.h"
+#include "../../../kilolib/kilolib.h"
 #define DEBUG
-#include "../../kilolib/debug.h"
+#include "../../../kilolib/debug.h"
 
 // preprocessor directives to assign BIT values
 #define SetBit(A, k) (A[(k / 32)] |= (1 << (k % 32)))     // sets the kth bit in array A
@@ -27,13 +27,13 @@
 
 // Kilobots count used for experimentation
 #define ROBOTS_IN_FIRST_CIRCLE 8
-#define TOTAL_KILOBOTS 20
-#define MAX_NEIGHBORS 200
+#define TOTAL_KILOBOTS 8
+// #define MAX_NEIGHBORS 200  // REMOVE LATER
 
 // Parameters for Circle formation
 #define DESIRED_DISTANCE  65
 #define EPSILON           20
-#define MIN_DISTANCE      35
+// #define MIN_DISTANCE      35  // REMOVE LATER
 #define MAX_DISTANCE      140
 
 // LED colors (Used as debugging mechanism)
@@ -64,7 +64,6 @@ void move(int new_motion, int duration) {
             // Go STRAIGHT
             spinup_motors();
             set_motors(kilo_straight_left, kilo_straight_right);
-            // set_motors(kilo_turn_left, kilo_turn_right);  // Pivot anti-clockwise
             delay(duration);
             set_motors(0, 0);
             delay(duration);
@@ -73,8 +72,6 @@ void move(int new_motion, int duration) {
             // Turn LEFT
             spinup_motors();
             set_motors(kilo_straight_left, 0);
-            // spindown(255);  // spins anti-clockwise
-            // kilo_turn_left(255);  // spins anti-clockwise
             delay(duration);
             set_motors(0, 0);
             delay(duration);
@@ -83,8 +80,6 @@ void move(int new_motion, int duration) {
             // Turn RIGHT
             spinup_motors();
             set_motors(0, kilo_straight_right);
-            // spinup(255);  // spins clockwise
-            // kilo_turn_right(255);  // spins clockwise
             delay(duration);
             set_motors(0, 0);
             delay(duration);
@@ -106,7 +101,6 @@ struct GLOBALS {
     // NOTE: the use of a GLOBALS struct will also work on a normal kilobot,
     //       but is not required on a normal kilobot.
     //       It is, however, required by the simulator.
-    // int rcvd_id;
     int current_motion;
     int loop_count;
     int distance;
@@ -156,7 +150,6 @@ struct GLOBALS {
  */
 void setup() {
     // Initializing Varibales
-    // g->rcvd_id = -1;  // ?????
     //**********************************************************
     for (int n = 0; n < 3; n++) {
         g->my_array[n] = 0;
@@ -236,15 +229,15 @@ void setup() {
     g->outgoing_message.crc = message_crc(&g->outgoing_message);
 }
 
-int count() {
-    int counter = 0;
-    for (int p = 0; p < 96; p++) {
-        if (TestBit(g->my_array, p)) {
-            counter++;
-        }
-    }
-    return counter;
-}
+// int count() {
+//     int counter = 0;
+//     for (int p = 0; p < 96; p++) {
+//         if (TestBit(g->my_array, p)) {
+//             counter++;
+//         }
+//     }
+//     return counter;
+// }
 
 void loop() {
     // update looper which tracks the time since the kilobot started
@@ -259,7 +252,7 @@ void loop() {
     g->outgoing_message.data[1] = 0;
     g->my_stop_status = 0;
 
-    // move(STOP, 200);  // [MOTOR ACTION]: stop previous motor action for every new iteration
+    move(STOP, 200);  // [MOTOR ACTION]: stop previous motor action for every new iteration
     set_color(LED_OFF);  // [INDICATION]: Color indicates that kilobot not in communication range of others
 
     // [CASE]: when a new message is received
@@ -267,18 +260,18 @@ void loop() {
         g->new_message = 0;  // reset message flag
         set_color(LED_GREEN);  // [INDICATION]: kilobot is in communication range with others
 
-    // OTTE -------- START different distance based cases for first circle -----
+     // OTTE -------- START different distance based cases for first circle -----
 
         // [CASE]: Kilobot reached desired orbit (Define Stopping Criterion)
-        if ((g->distance < (DESIRED_DISTANCE - EPSILON)) && (g->distance <= (DESIRED_DISTANCE + EPSILON))) {
-            move(STOP, 1000);  // [MOTOR ACTION]: stop motors
-            set_color(LED_BLUE);  // [INDICATION]: kilobot has reached it's destination
-
+        if ((g->distance > (DESIRED_DISTANCE - EPSILON)) && (g->distance <= (DESIRED_DISTANCE + EPSILON))) {
             // [UPDATE]: First circle is formed
             g->my_ring_number = 1;
             g->outgoing_message.data[1] = 1;  // Ring 1 complete
             g->my_stop_status = 1;  // stop algorithm
-            // g->messgae.data[8]=1;  // I'm ring 1 ????
+
+            set_color(LED_BLUE);  // [INDICATION]: kilobot has reached it's destination
+            move(STOP, 1000);  // [MOTOR ACTION]: stop motors
+            // g->messgae.data[8]=1;  // I'm ring 1  // REMOVE LATER
         }
 
         // [CASE]: when kilobot is very close to the Seed robot
@@ -288,8 +281,7 @@ void loop() {
             set_color(LED_RED);  // [INDICATION]: planet is close to colliding with Seed robot
 
             // [MOTOR ACTION]: kilobot has to turn around and go backwards (away from collision range of Seed)
-            move(LEFT, 500);
-            move(LEFT, 500);
+            move(LEFT, 1000);
             move(FORWARD, 650);
             g->my_stop_status = 0;
         }
@@ -298,15 +290,16 @@ void loop() {
         if ((g->distance > (DESIRED_DISTANCE + EPSILON)) && (g->distance <= MAX_DISTANCE)) {
             set_color(LED_CYAN);  // [INDICATION]: planet is about to enter orbit
             move(FORWARD, 150);  // [MOTOR ACTION]: move straight
-            // g->my_stop_status=0;????
+            // g->my_stop_status=0;  // REMOVE LATER?
         }
 
-    // OTTE -------- END different distance based cases for first circle
+     // OTTE -------- END different distance based cases for first circle
 
         // [CHECK]: Circle 1 formation (OTTE)
         if (g->ring_status_from_star_robot == 1) {
             // [CASE]: if first circle formed, indicate other bots
             g->outgoing_message.data[3] = 1;
+            set_color(LED_WHITE);  // [INDICATION]: Circle formed
 
             if (g->distance < (DESIRED_DISTANCE + EPSILON)) {
                 set_color(LED_WHITE);  // [INDICATION]: Circle formed
@@ -323,7 +316,7 @@ void loop() {
     if (g->new_message_from_L1_robot == 1) {
         g->new_message_from_L1_robot = 0;  // reset the status
 
-        // OTTE ---------- START different cases for circle 1 and 2 formation given a message from a robot on circle 1
+        // OTTE ------- START different cases for circle 1 and 2 formation given a message from a robot on circle 1
 
         // [CASE]: Steering for formation of L1 (circle 1)
         if (g->message_from_stopped_L1_robot == 1 &&
@@ -334,7 +327,7 @@ void loop() {
                 * @brief not stopped and ring not formed, and
                 *        recieved message from a robot on circle 1,
                 *        so move striaght and then turn. (OTTE)
-                * 
+                *
                 */
                 g->message_from_stopped_L1_robot = 0;  // Reset the flag
 
@@ -351,7 +344,7 @@ void loop() {
                 /**
                  * @brief too far from circle 1, but we did hear from a circle 1
                  *         robot, so just sleep? (OTTE)
-                 * 
+                 *
                  */
                 g->message_from_stopped_L1_robot = 0;  // Reset the flag
 
@@ -361,7 +354,7 @@ void loop() {
                 if (g->distance_from_L1_robot >= (DESIRED_DISTANCE)) {
                     /**
                     * @brief far from ring 1 robot, so aim to form ring 2 (OTTE)
-                    * 
+                    *
                     */
 
                     // [Update]: Stop status
@@ -380,7 +373,7 @@ void loop() {
                     * @brief close (< 28 away from circle 1) but we did hear from a circle 1 robot.
                     *        Change this for "perfect-ness of the circle".
                     *        Larger the value, better the circle but trades off with time
-                    * 
+                    *
                     */
 
                     // [CASE]: planet going away, it looks like we just move forward a bit
@@ -390,14 +383,14 @@ void loop() {
 
                         set_color(LED_CYAN);  // [INDICATION]: Atmost there, so move forward
                         move(FORWARD, 1000);  // [MOTOR ACTION]: Move forward
-                        // g->my_stop_status=1; //try removing this????
+                        // g->my_stop_status=1;  // REMOVE LATER?
                     }
 
                     if (g->distance_from_L1_robot < g->previous_dist_from_planet_robot) {
                         /**
                         * @brief Going toward the circle 1 robot, we change stop status to stopped,
                         *        and then pivot and then move straight (OTTE)
-                        * 
+                        *
                         */
 
                         // [UPDATE]: Stop status and previous distance Flag
@@ -426,9 +419,9 @@ void loop() {
                 /**
                  * @brief already stopped, and the circle 1 is already formed, and
                  *        we're greater than 32 from, presumably, the robot on circle 2 (OTTE)
-                 * 
+                 *
                  */
-                // OR-ING (What the heck is this)????
+                // OR-ING (What the heck is this)  // REMOVE LATER?
                 for (g->y = 0; g->y < 96; g->y++) {
                     g->my_array[g->y / 32] = g->my_array[g->y / 32] | g->rcvd_array[g->y / 32];
                 }
@@ -455,7 +448,7 @@ void loop() {
         if (g->my_stop_status == 0 && (g->my_count >= 10 || g->rcvd_count >= 10)) {
             /**
              * @brief not stopped, and we've heard from 6 robots on the circle (or 3 this time) (OTTE)
-             * 
+             *
              */
 
             // [CASE]: If kilobot in communication range, but far from circle 2
@@ -465,7 +458,7 @@ void loop() {
                 /**
                  * @brief if in appoperiate range of circle 2 and also greater than 30 from all
                  *        other types of robots in circles, then stop
-                 * 
+                 *
                  */
 
                 // [UPDATE]: update stop status flag
@@ -481,7 +474,7 @@ void loop() {
                 /**
                  * @brief change this for "perfect-ness of the circle". Larger the value,
                  *        better the circle but trades off with time
-                 * 
+                 *
                  */
 
                 // [CASE]: going away
@@ -491,7 +484,7 @@ void loop() {
 
                     set_color(LED_YELLOW);  // [INDICATION]: Kilobot moving out of range
                     move(FORWARD, 1000);  // [MOTOR ACTION]: Move straight
-                    // g->my_stop_status=1; //try removing this????
+                    // g->my_stop_status=1;  // REMOVE LATER
                 }
 
                 // [CASE]: turn left, then move straight. Not sure what this is about (OTTE)
@@ -536,6 +529,9 @@ void loop() {
  * @param d  // distance 
  */
 void message_rx(message_t *m, distance_measurement_t *d) {
+    // // [UPDATE]: time when message for received
+    // g->timer = kilo_ticks;
+
     // [CASE]: getting message from star robot
     if (m->data[0] == 0) {
         g->timer = kilo_ticks;
@@ -564,9 +560,9 @@ void message_rx(message_t *m, distance_measurement_t *d) {
             g->timer = kilo_ticks;
         }
 
-        // [CASE]: getting message from L2 robot (alrready stopped)
+        // [CASE]: getting message from L2 robot (already stopped)
         if (m->data[1] == 2) {
-            // g->timer=kilo_ticks;????
+            g->timer = kilo_ticks;
             g->heard_from_L2 = kilo_ticks;
             g->new_message_from_L2_robot = 1;
             g->distance_from_L2_robot = estimate_distance(d);
@@ -578,9 +574,9 @@ void message_rx(message_t *m, distance_measurement_t *d) {
 
             // printf("bit : %d", SetBit(g->my_array, m->data[2]));
             g->rcvd_array[g->count] = ((uint32_t)m->data[4] << 24) +
-                                        ((uint32_t)m->data[5] << 16) +
-                                        ((uint32_t)m->data[6] << 8) +
-                                        ((uint32_t)m->data[7]);
+                                      ((uint32_t)m->data[5] << 16) +
+                                      ((uint32_t)m->data[6] << 8) +
+                                      ((uint32_t)m->data[7]);
             g->rcvd_count = m->data[8];
             //*************
         }
