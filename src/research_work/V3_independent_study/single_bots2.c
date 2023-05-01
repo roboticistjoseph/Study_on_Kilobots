@@ -121,11 +121,15 @@ struct GLOBALS {
     int distance_from_L2_robot;
 
     //**************************************
-    int y;
-    int my_array[TOTAL_KILOBOTS];    // holds bits for 96 robots 3*(4*8bits)  int is 4bytes
-    int rcvd_array[TOTAL_KILOBOTS];  // holds bits for 96 robots 3*(4*8bits)  int is 4bytes
+    /**
+     * @brief Since kilobot uses 8bit AVR microcontroller, 'int' can only store 16bits of data.
+     * 
+     */
+    int my_array[TOTAL_KILOBOTS];    // holds bits for 64 robots 4kilobots*(2bytes*8bits)  int is 2bytes
+    int rcvd_array[TOTAL_KILOBOTS];  // holds bits for 64 robots 4kilobots*(2bytes*8bits)  int is 2bytes
     int array_bits = sizeof(my_array) * 8;  // holds the bit value of the array
     int array_divisor = array_bits/TOTAL_KILOBOTS;  // holds the divisor for array_bits
+    int y;
 
     // int time_array[NUM_R];  // REMOVE LATER
 
