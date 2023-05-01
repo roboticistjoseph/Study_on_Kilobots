@@ -28,7 +28,8 @@
 // Kilobots count used for experimentation
 #define ROBOTS_IN_FIRST_CIRCLE 8
 #define ROBOTS_IN_SECOND_CIRCLE 10
-#define TOTAL_KILOBOTS 8
+#define TOTAL_KILOBOTS 4  // Value 1: 16robots, Value 2: 32robots, Value 3: 48robots, Value 4: 64robots
+// #define NUM_R 20  // REMOVE LATER
 // #define MAX_NEIGHBORS 200  // REMOVE LATER
 
 // Parameters for Circle formation
@@ -120,10 +121,14 @@ struct GLOBALS {
     int distance_from_L2_robot;
 
     //**************************************
-    int my_array[4];    // holds bits for 96 robots 3*(4*8bits)  int is 4bytes
-    int rcvd_array[4];  // holds bits for 96 robots 3*(4*8bits)  int is 4bytes
-    int time_array[TOTAL_KILOBOTS];
-    int y;  // Where are we using this  // REMOVE LATER
+    int y;
+    int my_array[TOTAL_KILOBOTS];    // holds bits for 96 robots 3*(4*8bits)  int is 4bytes
+    int rcvd_array[TOTAL_KILOBOTS];  // holds bits for 96 robots 3*(4*8bits)  int is 4bytes
+    int array_bits = sizeof(my_array) * 8;  // holds the bit value of the array
+    int array_divisor = array_bits/TOTAL_KILOBOTS;  // holds the divisor for array_bits
+
+    // int time_array[NUM_R];  // REMOVE LATER
+
     int rcvd_count;
     int my_count;
     int my_ring_number;
@@ -152,14 +157,15 @@ struct GLOBALS {
 void setup() {
     // Initializing Varibales
     //**********************************************************
-    for (int n = 0; n < 3; n++) {
+    for (int n = 0; n < TOTAL_KILOBOTS; n++) {
         g->my_array[n] = 0;
         g->rcvd_array[n] = 0;
     }
 
-    for (int r = 0; r <= TOTAL_KILOBOTS - 1; r++) {
-        g->time_array[r] = 0;
-    }
+    // REMOVE LATER
+    // for (int r = 0; r <= NUM_R - 1; r++) {
+    //     g->time_array[r] = 0;
+    // }
 
     g->y = 0;
     g->rcvd_count = 0;
@@ -425,15 +431,16 @@ void loop() {
                  *        we're greater than 32 from, presumably, the robot on circle 2 (OTTE)
                  *
                  */
-                // OR-ING (What the heck is this)  // REMOVE LATER?
-                for (g->y = 0; g->y < 96; g->y++) {
-                    g->my_array[g->y / 32] = g->my_array[g->y / 32] | g->rcvd_array[g->y / 32];
+                // OR-ING (to combine the data of my_array and rcvd_array to collect the data of all the robots)
+                for (g->y = 0; g->y < g->array_bits; g->y++) {
+                    g->my_array[g->y / array_divisor] =
+                        g->my_array[g->y / array_divisor] | g->rcvd_array[g->y / array_divisor];
                 }
 
-                g->i1 = (g->mask1&g->my_array[0])>>24;
-                g->i2 = (g->mask2&g->my_array[0])>>16;
-                g->i3 = (g->mask3&g->my_array[0])>>8;
-                g->i4 = (g->mask4&g->my_array[0]);
+                g->i1 = (g->mask1&g->my_array[0])>>24;  // extract the first 8 bits
+                g->i2 = (g->mask2&g->my_array[0])>>16;  // extract the second 8 bits
+                g->i3 = (g->mask3&g->my_array[0])>>8;   // extract the third 8 bits
+                g->i4 = (g->mask4&g->my_array[0]);      // extract the last 8 bits
 
                 g->count++;
                 if (g->count == 4) {
@@ -573,7 +580,7 @@ void message_rx(message_t *m, distance_measurement_t *d) {
             g->distance_from_L2_robot = estimate_distance(d);
 
             //************
-            // g->time_array[m->data[2]]=kilo_ticks;
+            // g->time_array[m->data[2]]=kilo_ticks;  // REMOVE LATER
             SetBit(g->my_array, m->data[2]);
             // setting m->data[1]th bit equal 1 , m->data[1] is the kilouid of the robot we recieve message from
 
