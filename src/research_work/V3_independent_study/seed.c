@@ -155,7 +155,7 @@ void loop() {
             break;
         case 7:
             set_color(LED_WHITE);
-            printf("7 kilobots in first circle\n");  // REMOVE LATER
+            // printf("7 kilobots in first circle\n");  // REMOVE LATER
             break;
         default:
             set_color(LED_OFF);
@@ -176,7 +176,7 @@ void message_rx(message_t *m, distance_measurement_t *d) {
       // REMOVE LATER
       set_color(LED_GREEN);
       delay(1000);
-      // printf("Message received from planet robot\n");  // REMOVE LATER
+      // printf("Message received from planet robot %u\n", kilo_uid);  // REMOVE LATER
     // if the planet robot is part of first ring
     if (m->data[1] == 1) {
       // NOTE: m->data[2] has the kilobot uid that is in communication

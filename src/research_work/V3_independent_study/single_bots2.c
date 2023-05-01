@@ -322,12 +322,14 @@ void loop() {
         if (g->message_from_stopped_L1_robot == 1 &&
             g->my_stop_status == 0 &&
             g->ring_status_from_planet_robot == 0 &&
-            g->distance < (DESIRED_DISTANCE + EPSILON)) {  // I am changing distance from > to < // REMOVE LATER?
+            // g->distance < (DESIRED_DISTANCE + EPSILON)) {  // I am changing distance from > to < // REMOVE LATER?
+            (g->distance >= (DESIRED_DISTANCE - EPSILON)) &&
+            (g->distance <= (DESIRED_DISTANCE + EPSILON))) {  // I am changing distance  // REMOVE LATER?
                 /**
                 * @brief circle 1 not formed, and
                 *        Current kilobot is not stopped and ring not formed, and
                 *        recieved message from a robot on circle 1,
-                *        so move striaght and then turn. (OTTE)
+                *        so move striaght and then turn (to get it in communication range of seed). (OTTE)
                 *
                 */
                 g->message_from_stopped_L1_robot = 0;  // Reset the flag
@@ -340,8 +342,8 @@ void loop() {
         // [CASE]: L1 formed (circle 1)
         if (g->message_from_stopped_L1_robot == 1 &&
             g->my_stop_status == 0 &&
-            g->ring_status_from_planet_robot == 1 &&
-            g->distance > (DESIRED_DISTANCE + EPSILON)) {
+            g->ring_status_from_planet_robot == 1) {  // &&
+            // g->distance > (DESIRED_DISTANCE + EPSILON)) {  // Original // REMOVE LATER?
                 /**
                  * @brief too far from circle 1, but we did hear from a circle 1
                  *         robot, so just sleep? (OTTE)
@@ -350,9 +352,9 @@ void loop() {
                 g->message_from_stopped_L1_robot = 0;  // Reset the flag
 
 
-                // [CASE]: Ring 1 is formed, this robor is not stopped, and
-                // it is far from the seed robot (OTTE)
-                if (g->distance_from_L1_robot >= (DESIRED_DISTANCE)) {
+                // [CASE]: Ring 1 is formed, this robot is not stopped, and
+                // it is far from the planet robot (OTTE)
+                if (g->distance_from_L1_robot > (DESIRED_DISTANCE)) {
                     /**
                     * @brief far from ring 1 robot, so aim to form ring 2 (OTTE)
                     *
@@ -371,7 +373,7 @@ void loop() {
                 // [CASE]: Close to Ring 1 (L1)
                 if (g->distance_from_L1_robot < (DESIRED_DISTANCE)) {
                     /**
-                    * @brief close (< 28 away from circle 1) but we did hear from a circle 1 robot.
+                    * @brief close to circle 1 planet robot
                     *        Change this for "perfect-ness of the circle".
                     *        Larger the value, better the circle but trades off with time
                     *
@@ -383,7 +385,7 @@ void loop() {
                         g->previous_dist_from_planet_robot = g->distance_from_L1_robot;
 
                         set_color(LED_CYAN);  // [INDICATION]: Atmost there, so move forward
-                        move(FORWARD, 1000);  // [MOTOR ACTION]: Move forward
+                        move(FORWARD, 500);  // [MOTOR ACTION]: Move forward
                         // g->my_stop_status=1;  // REMOVE LATER?
                     }
 

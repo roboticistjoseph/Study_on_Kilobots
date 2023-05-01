@@ -220,6 +220,7 @@ void setup() {
 
     // kilo_uid
     g->outgoing_message.data[2] = kilo_uid;
+    // g->outgoing_message.data[2] = kilo_uid & 0xFF;  // REMOVE LATER
 
     // ring status to tell other robot planets
     g->outgoing_message.data[3] = 0;
