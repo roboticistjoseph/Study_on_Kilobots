@@ -263,7 +263,7 @@ void loop() {
      // OTTE -------- START different distance based cases for first circle -----
 
         // [CASE]: Kilobot reached desired orbit (Define Stopping Criterion)
-        if ((g->distance > (DESIRED_DISTANCE - EPSILON)) && (g->distance <= (DESIRED_DISTANCE + EPSILON))) {
+        if ((g->distance >= (DESIRED_DISTANCE - EPSILON)) && (g->distance <= (DESIRED_DISTANCE + EPSILON))) {
             // [UPDATE]: First circle is formed
             g->my_ring_number = 1;
             g->outgoing_message.data[1] = 1;  // Ring 1 complete
@@ -275,7 +275,7 @@ void loop() {
         }
 
         // [CASE]: when kilobot is very close to the Seed robot
-        if ((g->distance < MIN_DISTANCE) &&
+        if ((g->distance < (DESIRED_DISTANCE - EPSILON)) &&
              g->ring_status_from_star_robot == 0 &&
              g->ring_status_from_planet_robot == 0) {
             set_color(LED_RED);  // [INDICATION]: planet is close to colliding with Seed robot

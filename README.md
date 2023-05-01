@@ -28,7 +28,7 @@ Author:  Joseph Pranadeer Reddy Katakam (jkatak73@terpmail.umd.edu)
 Kilobots are low-cost swarm robots designed to execute commands in groups of up to a thousand, simulating swarms of insects, and performing tasks that cannot be done by individual robots, developed by Harvard University's Radhika Nagpal and Michael Rubenstein, capable of collective transport.
 
 ## Instructions to Setup KiloGUI and Connect to Controller:
-- To set up KiloGUI (software to upload code onto kilobot), there is a file called '[Kilobot GUI Setup_Guide.pdf](/assets/Kilobot_GUI_Setup_Guide.pdf)' in the 'assets' folder located in the main directory.
+- To set up KiloGUI (software to upload code onto kilobot), there is a file called '[Kilobot GUI Setup_Guide.pdf](/assets/kilobot%20hardware%20setup/Kilobot_GUI_Setup_Guide.pdf)' in the 'assets' folder located in the main directory.
 - Once everything has been set up, everytime you can proceed to Step (5-7) in Section III of the PDF to connect the Arduino controller with the PC.
 
 ## About this Package:

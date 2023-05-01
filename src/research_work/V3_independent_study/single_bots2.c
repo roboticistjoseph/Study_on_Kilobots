@@ -101,7 +101,7 @@ struct GLOBALS {
     // NOTE: the use of a GLOBALS struct will also work on a normal kilobot,
     //       but is not required on a normal kilobot.
     //       It is, however, required by the simulator.
-    int current_motion;
+    // int current_motion;
     int loop_count;
     int distance;
     int new_message;
@@ -114,7 +114,7 @@ struct GLOBALS {
     int my_stop_status;
     int distance_from_L1_robot;
     int previous_dist_from_planet_robot;
-    int layer_2_robot_done;
+    // int layer_2_robot_done;
     int new_message_from_L2_robot;
     int distance_from_L2_robot;
 
@@ -122,7 +122,7 @@ struct GLOBALS {
     int my_array[4];    // holds bits for 96 robots 3*(4*8bits)  int is 4bytes
     int rcvd_array[4];  // holds bits for 96 robots 3*(4*8bits)  int is 4bytes
     int time_array[TOTAL_KILOBOTS];
-    int y;
+    int y;  // Where are we using this  // REMOVE LATER
     int rcvd_count;
     int my_count;
     int my_ring_number;
@@ -168,7 +168,7 @@ void setup() {
     g->outgoing_message.data[5] = 0;  // for rcvd array
     g->outgoing_message.data[6] = 0;  // for rcvd array
     g->outgoing_message.data[7] = 0;
-    g->outgoing_message.data[8] = 0;  // for counter value
+    g->outgoing_message.data[8] = 0;  // for counter value  // REMOVE LATER
                                       // g->messgae.data[8]=0;  // layer number
     g->my_ring_number = 0;
     g->previous_dist_from_L2 = 0;
@@ -187,7 +187,7 @@ void setup() {
     g->my_stop_status = 0;
     g->distance_from_L1_robot = 10000;
     g->previous_dist_from_planet_robot = 0;
-    g->layer_2_robot_done = 0;
+    // g->layer_2_robot_done = 0;
     g->new_message_from_L2_robot = 0;
     g->distance_from_L2_robot = 10000;
 
@@ -263,7 +263,7 @@ void loop() {
      // OTTE -------- START different distance based cases for first circle -----
 
         // [CASE]: Kilobot reached desired orbit (Define Stopping Criterion)
-        if ((g->distance > (DESIRED_DISTANCE - EPSILON)) && (g->distance <= (DESIRED_DISTANCE + EPSILON))) {
+        if ((g->distance >= (DESIRED_DISTANCE - EPSILON)) && (g->distance <= (DESIRED_DISTANCE + EPSILON))) {
             // [UPDATE]: First circle is formed
             g->my_ring_number = 1;
             g->outgoing_message.data[1] = 1;  // Ring 1 complete
@@ -275,14 +275,14 @@ void loop() {
         }
 
         // [CASE]: when kilobot is very close to the Seed robot
-        if ((g->distance < MIN_DISTANCE) &&
+        if ((g->distance < (DESIRED_DISTANCE - EPSILON)) &&
              g->ring_status_from_star_robot == 0 &&
              g->ring_status_from_planet_robot == 0) {
             set_color(LED_RED);  // [INDICATION]: planet is close to colliding with Seed robot
 
             // [MOTOR ACTION]: kilobot has to turn around and go backwards (away from collision range of Seed)
             move(LEFT, 1000);
-            move(FORWARD, 650);
+            move(FORWARD, 850);
             g->my_stop_status = 0;
         }
 
@@ -299,7 +299,7 @@ void loop() {
         if (g->ring_status_from_star_robot == 1) {
             // [CASE]: if first circle formed, indicate other bots
             g->outgoing_message.data[3] = 1;
-            set_color(LED_WHITE);  // [INDICATION]: Circle formed
+            set_color(LED_WHITE);  // [INDICATION]: Circle formed  // REMOVE LATER
 
             if (g->distance < (DESIRED_DISTANCE + EPSILON)) {
                 set_color(LED_WHITE);  // [INDICATION]: Circle formed
@@ -322,9 +322,10 @@ void loop() {
         if (g->message_from_stopped_L1_robot == 1 &&
             g->my_stop_status == 0 &&
             g->ring_status_from_planet_robot == 0 &&
-            g->distance >= (DESIRED_DISTANCE + EPSILON)) {
+            g->distance < (DESIRED_DISTANCE + EPSILON)) {  // I am changing distance from > to < // REMOVE LATER?
                 /**
-                * @brief not stopped and ring not formed, and
+                * @brief circle 1 not formed, and
+                *        Current kilobot is not stopped and ring not formed, and
                 *        recieved message from a robot on circle 1,
                 *        so move striaght and then turn. (OTTE)
                 *
