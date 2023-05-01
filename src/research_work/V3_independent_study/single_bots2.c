@@ -27,6 +27,7 @@
 
 // Kilobots count used for experimentation
 #define ROBOTS_IN_FIRST_CIRCLE 8
+#define ROBOTS_IN_SECOND_CIRCLE 10
 #define TOTAL_KILOBOTS 8
 // #define MAX_NEIGHBORS 200  // REMOVE LATER
 
@@ -448,7 +449,8 @@ void loop() {
             }
 
         // [CASE]: not stopped, and we've heard from 6 robots on the circle (or 3 this time) (OTTE)
-        if (g->my_stop_status == 0 && (g->my_count >= 10 || g->rcvd_count >= 10)) {
+        if (g->my_stop_status == 0 &&
+            (g->my_count >= ROBOTS_IN_SECOND_CIRCLE || g->rcvd_count >= ROBOTS_IN_SECOND_CIRCLE)) {
             /**
              * @brief not stopped, and we've heard from 6 robots on the circle (or 3 this time) (OTTE)
              *
