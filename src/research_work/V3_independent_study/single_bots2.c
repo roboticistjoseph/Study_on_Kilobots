@@ -179,7 +179,7 @@ void setup() {
     g->outgoing_message.data[5] = 0;  // for rcvd array
     g->outgoing_message.data[6] = 0;  // for rcvd array
     g->outgoing_message.data[7] = 0;
-    g->outgoing_message.data[8] = 0;  // for counter value  // REMOVE LATER
+    g->outgoing_message.data[8] = 0;  // for counter value
                                       // g->messgae.data[8]=0;  // layer number
     g->my_ring_number = 0;
     g->previous_dist_from_L2 = 0;
@@ -198,7 +198,7 @@ void setup() {
     g->my_stop_status = 0;
     g->distance_from_L1_robot = 10000;
     g->previous_dist_from_planet_robot = 0;
-    // g->layer_2_robot_done = 0;
+    // g->layer_2_robot_done = 0;  // REMOVE LATER
     g->new_message_from_L2_robot = 0;
     g->distance_from_L2_robot = 10000;
 

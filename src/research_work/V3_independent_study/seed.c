@@ -12,11 +12,12 @@
 
 // kilolib library
 #include "../../../kilolib/kilolib.h"
+#define DEBUG
 #include "../../../kilolib/debug.h"
 
 // preprocessor directives
 #define NUMBER_OF_ROBOTS 12  // Simulation uses 46
-#define DEBUG
+
 
 // LED colors
 #define LED_OFF          RGB(0, 0, 0)
@@ -93,7 +94,7 @@ void loop() {
       set_color(LED_MAGENTA);
       delay(1000);
       set_color(LED_OFF);
-      // printf("Message sent\n");  // REMOVE LATER
+      printf("Message sent\n");  // REMOVE LATER
   }
 
   int i;
@@ -115,7 +116,7 @@ void loop() {
       set_color(LED_CYAN);
       delay(1000);
       set_color(LED_OFF);
-      // printf("Kilobot %d is in first circle\n", i);  // REMOVE LATER
+      printf("Kilobot %d is in first circle\n", i);  // REMOVE LATER
     }
   }
 
@@ -127,11 +128,11 @@ void loop() {
     switch (g->message.data[1]) {
         case 0:
             set_color(LED_OFF);
-            // printf("No kilobots in first circle\n");  // REMOVE LATER
+            printf("No kilobots in first circle\n");  // REMOVE LATER
             break;
         case 1:
             set_color(LED_GREEN);
-            // printf("1 kilobot in first circle\n");  // REMOVE LATER
+            printf("1 kilobot in first circle\n");  // REMOVE LATER
             break;
         case 2:
             set_color(LED_YELLOW);
@@ -173,10 +174,7 @@ void loop() {
 void message_rx(message_t *m, distance_measurement_t *d) {
   // getting msg from planet robot
   if (m->data[0] == 1) {
-      // REMOVE LATER
-      set_color(LED_GREEN);
-      delay(1000);
-      // printf("Message received from planet robot %u\n", kilo_uid);  // REMOVE LATER
+      printf("Message received from planet robot %u\n", kilo_uid);  // REMOVE LATER
     // if the planet robot is part of first ring
     if (m->data[1] == 1) {
       // NOTE: m->data[2] has the kilobot uid that is in communication
@@ -186,11 +184,11 @@ void message_rx(message_t *m, distance_measurement_t *d) {
       set_color(LED_CYAN);
       delay(1000);
       set_color(LED_OFF);
-      // printf("Message received from planet robot in first circle\n");  // REMOVE LATER
+      printf("Message received from planet robot in first circle\n");  // REMOVE LATER
     } else {  // if (m->data[1] == 0) {  // else should be used  // REMOVE LATER
       // if the planet robot is not part of first ring
       g->stopped_robots_array[m->data[2]] = 0;
-      // printf("Message received from planet robot not in first circle\n");  // REMOVE LATER
+      printf("Message received from planet robot not in first circle\n");  // REMOVE LATER
     }
   }
 }
@@ -228,6 +226,7 @@ int main() {
     #endif
 
     kilo_init();
+    debug_init();
 
     // Register the message_rx callback function.
     kilo_message_rx = message_rx;

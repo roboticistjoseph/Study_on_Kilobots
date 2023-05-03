@@ -249,6 +249,8 @@ void loop() {
         delay(9000);
     }
 
+    printf("Distance: %d\n", g->message.data[1]);  // REMOVE LATER
+
     // ring status is incomplete (reset) for every new iteration
     g->outgoing_message.data[1] = 0;
     g->my_stop_status = 0;
