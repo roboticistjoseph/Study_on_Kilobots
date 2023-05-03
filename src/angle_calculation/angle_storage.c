@@ -267,16 +267,16 @@ void loop() {
 
 int main() {
   kilo_init();
-    // Register the message_rx callback function.
-    // if (kilo_uid==0 && kilo_uid == 1)
-    kilo_message_rx = message_rx;
+  // Register the message_rx callback function.
+  // if (kilo_uid==0 && kilo_uid == 1)
+  kilo_message_rx = message_rx;
 
-    // Register the message_tx callback function.
-    kilo_message_tx = message_tx;
+  // Register the message_tx callback function.
+  kilo_message_tx = message_tx;
 
-    #ifdef DEBUG
-    debug_init();
-    #endif
+  #ifdef DEBUG
+  debug_init();
+  #endif
 
   kilo_start(setup, loop);
 

@@ -12,28 +12,62 @@
 #define DEBUG
 #include "../../kilolib/debug.h"
 
-// global variables
-uint16_t wait_time = 300;
+// communication message
+message_t message;
 
 // put your setup code here, will be run once at the beginning
 void setup() {
-    // nothing
+    // The type is always NORMAL.
+    message.type = NORMAL;
+
+    // kilo_uid
+    message.data[2] = kilo_uid;
+
+    // It's important that the CRC is computed after the data has been set;
+    // otherwise it would be wrong.
+    message.crc = message_crc(&g->message);
 }
 
 // put your main code here, will be run repeatedly
 void loop() {
-    // nothing
+    // do nothing
 }
 
+/**
+ * @brief receiver callback function.
+ * 
+ * @param m 
+ * @param d 
+ */
 void message_rx(message_t *m, distance_measurement_t *d) {
+    printf("Kilobot UID: %u\n", m->data[2]);  // REMOVE LATER
     printf("Distance: %d\n", estimate_distance(d));  // REMOVE LATER
-    printf("Kilobot UID: %u\n", kilo_uid);  // REMOVE LATER
+}
+
+/**
+ * @brief transmitter callback function.
+ * 
+ * @return message_t* 
+ */
+message_t *message_tx() {
+    // message is transmitted roughly twice per sec
+    return &(message);
 }
 
 int main() {
-  kilo_init();
-  debug_init();
-  kilo_start(setup, loop);
+    kilo_init();
 
-  return 0;
+    // Register the message_rx callback function.
+    kilo_message_rx = message_rx;
+
+    // Register the message_tx callback function.
+    kilo_message_tx = message_tx;
+
+    #ifdef DEBUG
+    debug_init();
+    #endif
+
+    kilo_start(setup, loop);
+
+    return 0;
 }
