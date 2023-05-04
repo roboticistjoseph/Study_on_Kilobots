@@ -115,6 +115,7 @@ void message_rx(message_t *m, distance_measurement_t *d) {
  * @return message_t* 
  */
 message_t *message_tx() {
+    printf("Transmitting Message: %u\n", message.data[1]);  // REMOVE LATER
     // message is transmitted roughly twice per sec
     return &(message);
 }

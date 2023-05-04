@@ -600,6 +600,7 @@ message_t *message_tx() {
     memcpy(&g->outgoing_message.data[6], &g->i3, sizeof(uint8_t));
     memcpy(&g->outgoing_message.data[7], &g->i4, sizeof(uint8_t));
 
+    printf("Transmitting Message: %u\n", g->outgoing_message.data[2]);  // REMOVE LATER
     return &(g->outgoing_message);
 }
 
