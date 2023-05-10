@@ -38,7 +38,7 @@
 
 // Parameters for Circle formation
 #define DESIRED_DISTANCE  55
-#define EPSILON           10
+#define EPSILON           15
 // #define MIN_DISTANCE      35  // Not used
 #define MAX_DISTANCE      90
 
@@ -130,7 +130,7 @@ struct GLOBALS {
     int my_array[TOTAL_KILOBOTS];    // holds bits for 64 robots 4kilobots*(2bytes*8bits)  int is 2bytes
     int rcvd_array[TOTAL_KILOBOTS];  // holds bits for 64 robots 4kilobots*(2bytes*8bits)  int is 2bytes
 
-    // ---------- Below two lines cause error for outgoing message ----------
+    // [FIX THIS LATER]---------- Below two lines cause error for outgoing message ----------
     // int array_bits = sizeof(my_array) * 8;  // holds the bit value of the array
     // int array_divisor = array_bits/TOTAL_KILOBOTS;  // holds the divisor for array_bits
 
@@ -235,7 +235,6 @@ void setup() {
 
     // kilo_uid
     g->outgoing_message.data[2] = kilo_uid;
-    // g->outgoing_message.data[2] = kilo_uid & 0xFF;  // REMOVE LATER
 
     // ring status to tell other robot planets
     g->outgoing_message.data[3] = 0;
@@ -244,16 +243,6 @@ void setup() {
     // otherwise it would be wrong.
     g->outgoing_message.crc = message_crc(&g->outgoing_message);
 }
-
-// int count() {
-//     int counter = 0;
-//     for (int p = 0; p < 96; p++) {
-//         if (TestBit(g->my_array, p)) {
-//             counter++;
-//         }
-//     }
-//     return counter;
-// }
 
 void loop() {
     printf("Distance: %d\n", g->distance);  // REMOVE LATER
@@ -265,10 +254,8 @@ void loop() {
         delay(9000);
     }
 
-    // printf("Distance: %d\n", g->message.data[1]);  // REMOVE LATER
-
     // ring status is incomplete (reset) for every new iteration
-    g->outgoing_message.data[1] = 0;
+    // g->outgoing_message.data[1] = 0;  // is this needed? [FIX LATER]
     g->my_stop_status = 0;
 
     move(STOP, 200);  // [MOTOR ACTION]: stop previous motor action for every new iteration
@@ -277,7 +264,6 @@ void loop() {
     // [CASE]: when a new message is received
     if (g->new_message == 1) {
         g->new_message = 0;  // reset message flag
-        // set_color(LED_GREEN);  // [INDICATION]: kilobot is in communication range with others
 
      // OTTE -------- START different distance based cases for first circle -----
 
@@ -290,22 +276,25 @@ void loop() {
 
             set_color(LED_BLUE);  // [INDICATION]: kilobot has reached it's destination
             move(STOP, 1000);  // [MOTOR ACTION]: stop motors
+            delay(2000);  // [DELAY]: wait for 2 second // dont rush
             // g->messgae.data[8]=1;  // I'm ring 1  // REMOVE LATER
         } else if ((g->distance < (DESIRED_DISTANCE - EPSILON)) &&
             // [CASE]: when kilobot is very close to the Seed robot
              g->ring_status_from_star_robot == 0 &&
              g->ring_status_from_planet_robot == 0) {
             set_color(LED_RED);  // [INDICATION]: planet is close to colliding with Seed robot
+            g->my_stop_status = 0;  // continue algorithm
 
             // [MOTOR ACTION]: kilobot has to turn around and go backwards (away from collision range of Seed)
             move(LEFT, 1000);
             move(FORWARD, 650);
-            g->my_stop_status = 0;
+            delay(2000);  // [DELAY]: wait for 2 second // dont rush
         } else if ((g->distance > (DESIRED_DISTANCE + EPSILON)) && (g->distance <= MAX_DISTANCE)) {
             // [Case]: when planet is close to the orbit but not in the orbit
             set_color(LED_CYAN);  // [INDICATION]: planet is about to enter orbit
+            g->my_stop_status = 0;  // REMOVE LATER?
+
             move(FORWARD, 150);  // [MOTOR ACTION]: move straight
-            // g->my_stop_status=0;  // REMOVE LATER?
         }
 
      // OTTE -------- END different distance based cases for first circle
