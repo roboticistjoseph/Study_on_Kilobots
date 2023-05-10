@@ -25,7 +25,7 @@ void setup() {
 
     // It's important that the CRC is computed after the data has been set;
     // otherwise it would be wrong.
-    message.crc = message_crc(&g->message);
+    message.crc = message_crc(&message);
 }
 
 // put your main code here, will be run repeatedly

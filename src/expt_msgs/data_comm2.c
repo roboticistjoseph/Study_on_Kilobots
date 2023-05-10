@@ -45,9 +45,6 @@ void setup() {
   // track & communicate the number of kilobots present in first circle
   message.data[1] = 0;
 
-  // kilo_uid
-  message.data[2] = kilo_uid;
-
   // It's important that the CRC is computed after the data has been set;
   // otherwise it would be wrong.
   message.crc = message_crc(&message);
@@ -58,39 +55,7 @@ void setup() {
  * 
  */
 void loop() {
-    // -------------- Uncomment and comment out below if needed ----------------
-    message.data[1] = 0;  // reset message data to 0
-
-    // Blink LED magenta whenever a message is sent.
-    if (message_sent == 1) {
-        // Reset flag so LED is only blinked once per message.
-        message_sent = 0;
-        // printf("Message Transmitted\n");  // REMOVE LATER
-    }
-
-    if (looper < 5) {
-        set_color(LED_RED);
-        // printf("Initial Loop\n");  // REMOVE LATER
-        message.data[1] = 0;
-        delay(1000);
-    }
-
-    if (looper >= 5 && looper < 10) {
-        set_color(LED_BLUE);
-        // printf("Data[1] Updating...\n");  // REMOVE LATER
-        message.data[1] = 1;
-        delay(1000);
-    }
-
-    if (looper >= 10) {
-        set_color(LED_GREEN);
-        // printf("Data[1] Updating...\n");  // REMOVE LATER
-        message.data[1] = 2;
-        delay(1000);
-        // looper = -1;
-    }
-
-    looper++;
+    // do nothing
 }
 
 /**
@@ -114,26 +79,6 @@ void message_rx(message_t *m, distance_measurement_t *d) {
       printf("Data[1] not updated\n");  // REMOVE LATER
     }
   }
-}
-
-/**
- * @brief transmitter callback function.
- * 
- * @return message_t* 
- */
-message_t *message_tx() {
-    message.crc = message_crc(&message);
-    // message is transmitted roughly twice per sec
-    return &(message);
-}
-
-/**
- * @brief message success callback (called *after* a message is sent)
- * 
- */
-void message_tx_success() {
-    // set flag on message transmission.
-    message_sent = 1;
 }
 
 int main() {
