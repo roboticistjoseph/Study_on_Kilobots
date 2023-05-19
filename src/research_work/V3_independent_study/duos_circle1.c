@@ -28,11 +28,13 @@
 // define number of robots in the experiment
 /**
  * @brief Number of robots in the experiment:
- *                                   First Circle: 8 (check with seed.c)
- *                                   Second Circle: 20
+ *                                   First Circle: 2
+ *                                   Second Circle: 10
+ *
+ * The number of kilobots should be an even number, as the DUOs exist as pairs.
  * 
  */
-#define ROBOTS_IN_FIRST_CIRCLE 8
+#define ROBOTS_IN_FIRST_CIRCLE 4
 #define ROBOTS_IN_SECOND_CIRCLE 10
 #define TOTAL_KILOBOTS 4  // Value 1: 16robots, Value 2: 32robots, Value 3: 48robots, Value 4: 64robots
 
@@ -157,6 +159,16 @@ struct GLOBALS {
     uint8_t i4;
     int count;
 } * g;  // there should only be one GLOBAL, this is it, remember to register it in main()
+
+// /**
+//  * @brief structure to hold the pair robot information.
+//  *
+//  */
+// typedef struct DUO {
+//     uint8_t uid;
+//     uint8_t pairUid;
+//     uint8_t hasIdentifiedPair;
+// } DUO;
 
 /**
  * @brief Kilobot Setup (will be run once at the beginning)
@@ -286,7 +298,12 @@ void loop() {
             g->my_stop_status = 0;  // continue algorithm
 
             // [MOTOR ACTION]: kilobot has to turn around and go backwards (away from collision range of Seed)
-            move(LEFT, 1000);
+            if (kilo_uid < TOTAL_KILOBOTS / 2) {
+                move(FORWARD, 2000);  // [MOTOR ACTION]: Left kilobot goes Straight
+            } else if (kilo_uid >= TOTAL_KILOBOTS / 2) {
+                move(STOP, 2000);  // [MOTOR ACTION]: Right kilobot stops
+            }
+
             move(FORWARD, 650);
             delay(2000);  // [DELAY]: wait for 2 second // dont rush
         } else if ((g->distance > (DESIRED_DISTANCE + EPSILON)) && (g->distance <= MAX_DISTANCE)) {
@@ -305,10 +322,11 @@ void loop() {
             g->outgoing_message.data[3] = 1;
             set_color(LED_WHITE);  // [INDICATION]: Circle formed
 
-            if (g->distance < (DESIRED_DISTANCE + EPSILON)) {
-                set_color(LED_WHITE);  // [INDICATION]: Circle formed
-                move(STOP, 1000);  // [MOTOR ACTION]: Stop
-            }
+            // REMOVE LATER
+            // if (g->distance < (DESIRED_DISTANCE + EPSILON)) {
+            //     set_color(LED_WHITE);  // [INDICATION]: Circle formed
+            //     move(STOP, 1000);  // [MOTOR ACTION]: Stop
+            // }
         } else {
             // [CASE]: first circle not formed
             g->outgoing_message.data[3] = 0;
@@ -520,8 +538,11 @@ void loop() {
             // [UPDATE]: kiloticks
             g->last_changed = kilo_ticks;
 
-            set_color(LED_YELLOW);  // [INDICATION]: kilobot very far from communication range
-            move(LEFT, 3400);  // [MOTOR ACTION]: Turn left
+            if (kilo_uid < TOTAL_KILOBOTS / 2) {
+                move(FORWARD, 3400);  // [MOTOR ACTION]: left kilobot goes straight
+            } else if (kilo_uid >= TOTAL_KILOBOTS / 2) {
+                move(STOP, 3400);  // [MOTOR ACTION]: right kilobot stops
+            }
         }
     }
 }

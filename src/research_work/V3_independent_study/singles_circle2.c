@@ -26,8 +26,8 @@
 #define TestBit(A, k) (A[(k / 32)] & (1u << (k % 32)))    // checks if we have 1 at kth position
 
 // Kilobots count used for experimentation
-#define ROBOTS_IN_FIRST_CIRCLE 8
-#define ROBOTS_IN_SECOND_CIRCLE 10
+#define ROBOTS_IN_FIRST_CIRCLE 2
+#define ROBOTS_IN_SECOND_CIRCLE 4
 #define TOTAL_KILOBOTS 4  // Value 1: 16robots, Value 2: 32robots, Value 3: 48robots, Value 4: 64robots
 // #define NUM_R 20  // REMOVE LATER
 // #define MAX_NEIGHBORS 200  // REMOVE LATER
@@ -121,18 +121,18 @@ struct GLOBALS {
     int distance_from_L2_robot;
 
     //**************************************
-    /**
-     * @brief Since kilobot uses 8bit AVR microcontroller, 'int' can only store 16bits of data.
-     * 
-     */
+
+    // Since kilobot uses 8bit AVR microcontroller, 'int' can only store 16bits of data.
     int my_array[TOTAL_KILOBOTS];    // holds bits for 64 robots 4kilobots*(2bytes*8bits)  int is 2bytes
     int rcvd_array[TOTAL_KILOBOTS];  // holds bits for 64 robots 4kilobots*(2bytes*8bits)  int is 2bytes
-    int array_bits = sizeof(my_array) * 8;  // holds the bit value of the array
-    int array_divisor = array_bits/TOTAL_KILOBOTS;  // holds the divisor for array_bits
-    int y;
+
+    // [FIX THIS LATER]---------- Below two lines cause error for outgoing message ----------
+    // int array_bits = sizeof(my_array) * 8;  // holds the bit value of the array
+    // int array_divisor = array_bits/TOTAL_KILOBOTS;  // holds the divisor for array_bits
 
     // int time_array[NUM_R];  // REMOVE LATER
 
+    int y;
     int rcvd_count;
     int my_count;
     int my_ring_number;
@@ -240,17 +240,8 @@ void setup() {
     g->outgoing_message.crc = message_crc(&g->outgoing_message);
 }
 
-// int count() {
-//     int counter = 0;
-//     for (int p = 0; p < 96; p++) {
-//         if (TestBit(g->my_array, p)) {
-//             counter++;
-//         }
-//     }
-//     return counter;
-// }
-
 void loop() {
+    printf("Distance: %d\n", g->distance);  // REMOVE LATER
     // update looper which tracks the time since the kilobot started
     g->loop_count++;
 
@@ -260,7 +251,7 @@ void loop() {
     }
 
     // ring status is incomplete (reset) for every new iteration
-    g->outgoing_message.data[1] = 0;
+    // g->outgoing_message.data[1] = 0;  // is this needed? [FIX LATER]
     g->my_stop_status = 0;
 
     move(STOP, 200);  // [MOTOR ACTION]: stop previous motor action for every new iteration
@@ -269,7 +260,6 @@ void loop() {
     // [CASE]: when a new message is received
     if (g->new_message == 1) {
         g->new_message = 0;  // reset message flag
-        set_color(LED_GREEN);  // [INDICATION]: kilobot is in communication range with others
 
      // OTTE -------- START different distance based cases for first circle -----
 
@@ -282,26 +272,25 @@ void loop() {
 
             set_color(LED_BLUE);  // [INDICATION]: kilobot has reached it's destination
             move(STOP, 1000);  // [MOTOR ACTION]: stop motors
+            delay(2000);  // [DELAY]: wait for 2 second // dont rush
             // g->messgae.data[8]=1;  // I'm ring 1  // REMOVE LATER
-        }
-
-        // [CASE]: when kilobot is very close to the Seed robot
-        if ((g->distance < (DESIRED_DISTANCE - EPSILON)) &&
+        } else if ((g->distance < (DESIRED_DISTANCE - EPSILON)) &&
+            // [CASE]: when kilobot is very close to the Seed robot
              g->ring_status_from_star_robot == 0 &&
              g->ring_status_from_planet_robot == 0) {
             set_color(LED_RED);  // [INDICATION]: planet is close to colliding with Seed robot
+            g->my_stop_status = 0;  // continue algorithm
 
             // [MOTOR ACTION]: kilobot has to turn around and go backwards (away from collision range of Seed)
             move(LEFT, 1000);
-            move(FORWARD, 850);
-            g->my_stop_status = 0;
-        }
-
-        // [Case]: when planet is close to the orbit but not in the orbit
-        if ((g->distance > (DESIRED_DISTANCE + EPSILON)) && (g->distance <= MAX_DISTANCE)) {
+            move(FORWARD, 650);
+            delay(2000);  // [DELAY]: wait for 2 second // dont rush
+        } else if ((g->distance > (DESIRED_DISTANCE + EPSILON)) && (g->distance <= MAX_DISTANCE)) {
+            // [Case]: when planet is close to the orbit but not in the orbit
             set_color(LED_CYAN);  // [INDICATION]: planet is about to enter orbit
+            g->my_stop_status = 0;  // REMOVE LATER?
+
             move(FORWARD, 150);  // [MOTOR ACTION]: move straight
-            // g->my_stop_status=0;  // REMOVE LATER?
         }
 
      // OTTE -------- END different distance based cases for first circle
@@ -310,12 +299,13 @@ void loop() {
         if (g->ring_status_from_star_robot == 1) {
             // [CASE]: if first circle formed, indicate other bots
             g->outgoing_message.data[3] = 1;
-            set_color(LED_WHITE);  // [INDICATION]: Circle formed  // REMOVE LATER
+            set_color(LED_WHITE);  // [INDICATION]: Circle formed
 
-            if (g->distance < (DESIRED_DISTANCE + EPSILON)) {
-                set_color(LED_WHITE);  // [INDICATION]: Circle formed
-                move(STOP, 1000);  // [MOTOR ACTION]: Stop
-            }
+            // REMOVE LATER
+            // if (g->distance < (DESIRED_DISTANCE + EPSILON)) {
+            //     set_color(LED_WHITE);  // [INDICATION]: Circle formed
+            //     move(STOP, 1000);  // [MOTOR ACTION]: Stop
+            // }
         } else {
             // [CASE]: first circle not formed
             g->outgoing_message.data[3] = 0;
@@ -435,10 +425,15 @@ void loop() {
                  *        we're greater than 32 from, presumably, the robot on circle 2 (OTTE)
                  *
                  */
-                // OR-ING (to combine the data of my_array and rcvd_array to collect the data of all the robots)
-                for (g->y = 0; g->y < g->array_bits; g->y++) {
-                    g->my_array[g->y / array_divisor] =
-                        g->my_array[g->y / array_divisor] | g->rcvd_array[g->y / array_divisor];
+                // // OR-ING (to combine the data of my_array and rcvd_array to collect the data of all the robots)
+                // for (g->y = 0; g->y < g->array_bits; g->y++) {
+                //     g->my_array[g->y / array_divisor] =
+                //         g->my_array[g->y / array_divisor] | g->rcvd_array[g->y / array_divisor];
+                // }
+
+                // OR-ING
+                for (g->y = 0; g->y < 96; g->y++) {
+                g->my_array[g->y / 32] = g->my_array[g->y / 32] | g->rcvd_array[g->y / 32];
                 }
 
                 g->i1 = (g->mask1&g->my_array[0])>>24;  // extract the first 8 bits
@@ -616,37 +611,42 @@ message_t *message_tx() {
     memcpy(&g->outgoing_message.data[6], &g->i3, sizeof(uint8_t));
     memcpy(&g->outgoing_message.data[7], &g->i4, sizeof(uint8_t));
 
+    printf("Transmitting Kilobot: %u\n", g->outgoing_message.data[2]);  // REMOVE LATER
+    printf("Transmitting Flag: %u\n", g->outgoing_message.data[1]);  // REMOVE LATER
+
+    // perform CRC on the message, as the values are updated
+    g->outgoing_message.crc = message_crc(&g->outgoing_message);
+
+    // message is transmitted roughly twice per sec
     return &(g->outgoing_message);
 }
 
 int main() {
-    struct GLOBALS* g_safe =  (struct GLOBALS*)malloc(sizeof(struct GLOBALS));
+  // Create user defined globals
+  struct GLOBALS* g_safe =  (struct GLOBALS*)malloc(sizeof(struct GLOBALS));
 
-#ifdef USING_SIMULATION
-    // register the global variables (only necessary on simulation)
-    // g is a pointer
-    // so the address of g is a pointer to a pointer,the address of it is getting casted to a pointer to a void pointer
+  // Initialize kilobot.
+  kilo_init();
 
-    kilo_globals = (void **)&g;  // NOLINT
-#endif
+  // Debugging mechanism
+  #ifdef DEBUG
+    debug_init();
+  #endif
 
-    kilo_init();
+  // Register the message_rx callback function.
+  kilo_message_rx = message_rx;
 
-    // Register the message_rx callback function.
-    kilo_message_rx = message_rx;
+  // Register the message_tx callback function.
+  kilo_message_tx = message_tx;
 
-    // Register the message_tx callback function.
-    kilo_message_tx = message_tx;
+  // Register user defined global structure.
+  g = g_safe;
 
-    g = g_safe;
+  // Start kilobot.
+  kilo_start(setup, loop);
 
-#ifdef USING_SIMULATION
-    kilo_start(setup, loop, message_rx, message_tx, message_tx_success);
-#else
-    kilo_start(setup, loop);
-    // free user defined globals
-    free(g_safe);
-#endif
+  // free user defined globals
+  free(g_safe);
 
-    return 0;
+  return 0;
 }
